@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>2. Ayımız Kutlu Olsun Hiram ❤️</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #000;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Yazı */
+        .message {
+            position: fixed;
+            z-index: 10;
+
+            top: 50%;
+            left: 50%;
+
+            transform: translate(-50%, -50%) scale(0.7);
+
+            width: 90%;
+            text-align: center;
+
+            color: white;
+            font-family: "Arial", sans-serif;
+
+            opacity: 0;
+
+            transition:
+                opacity 2s ease,
+                transform 2s ease;
+
+            pointer-events: none;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .message h1 {
+            font-size: clamp(28px, 5vw, 65px);
+
+            font-weight: 700;
+
+            background: linear-gradient(
+                90deg,
+                #ff0064,
+                #ffffff,
+                #6503ff
+            );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+
+            text-shadow:
+                0 0 15px rgba(255, 0, 100, 0.8),
+                0 0 35px rgba(101, 3, 255, 0.7);
+        }
+
+        .message p {
+            margin-top: 15px;
+
+            font-size: clamp(15px, 2vw, 22px);
+
+            color: #fff;
+
+            letter-spacing: 3px;
+
+            text-shadow:
+                0 0 10px #ff0064,
+                0 0 20px #6503ff;
+        }
+
+        .heart-icon {
+            margin-top: 20px;
+
+            font-size: 40px;
+
+            color: #ff0064;
+
+            animation: beat 1.2s infinite;
+
+            filter:
+                drop-shadow(0 0 10px #ff0064)
+                drop-shadow(0 0 25px #ff0064);
+        }
+
+        @keyframes beat {
+
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.25);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <canvas id="heart"></canvas>
+
+    <div class="message" id="message">
+
+        <h1>
+            2. Ayımız Kutlu Olsun Hiram
+        </h1>
+
+        <p>
+            İyi ki varsın ❤️
+        </p>
+
+        <div class="heart-icon">
+            ♥
+        </div>
+
+    </div>
+
+
+<script>
+
+const canvas = document.getElementById("heart");
+const ctx = canvas.getContext("2d");
+
+let width;
+let height;
+let scale;
+
+function resize() {
+
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+
+    scale = Math.min(width, height) / 42;
+}
+
+resize();
+
+window.addEventListener("resize", resize);
+
+
+/* Renkler */
+
+const colors = [
+    "#ff0064",
+    "#6503ff",
+    "#ff1493",
+    "#8a2be2",
+    "#ff4da6",
+    "#c800ff"
+];
+
+
+/* Kalp denklemi */
+
+function heart(t) {
+
+    const x =
+        16 * Math.pow(Math.sin(t), 3);
+
+    const y =
+        13 * Math.cos(t)
+        - 5 * Math.cos(2 * t)
+        - 2 * Math.cos(3 * t)
+        - Math.cos(4 * t);
+
+    return {
+        x,
+        y
+    };
+}
+
+
+/* Kalp noktaları */
+
+const points = [];
+
+for (let i = 0; i < 180; i++) {
+
+    const angle =
+        i * (Math.PI * 2) / 180;
+
+    const point = heart(angle);
+
+    points.push(point);
+}
+
+
+/* Animasyon */
+
+let progress = 0;
+
+function animate() {
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+    ctx.fillRect(0, 0, width, height);
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    /*
+        Kalbin oluşma hızı
+    */
+
+    progress += 0.7;
+
+    const visiblePoints =
+        Math.min(
+            Math.floor(progress),
+            points.length
+        );
+
+
+    for (let i = 0; i < visiblePoints; i++) {
+
+        const point = points[i];
+
+        const x =
+            centerX + point.x * scale;
+
+        const y =
+            centerY - point.y * scale;
+
+
+        const color =
+            colors[
+                Math.floor(
+                    Math.random() * colors.length
+                )
+            ];
+
+
+        /* Ana çizgi */
+
+        ctx.beginPath();
+
+        ctx.moveTo(centerX, centerY + 40);
+
+        ctx.lineTo(x, y);
+
+        ctx.strokeStyle = color;
+
+        ctx.lineWidth = 1.2;
+
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = color;
+
+        ctx.stroke();
+
+
+        /* Küçük ışınlar */
+
+        for (let j = 0; j < 8; j++) {
+
+            const rayAngle =
+                j * Math.PI / 4;
+
+            const length =
+                5 + Math.random() * 5;
+
+            const x2 =
+                x + Math.cos(rayAngle) * length;
+
+            const y2 =
+                y + Math.sin(rayAngle) * length;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(x, y);
+
+            ctx.lineTo(x2, y2);
+
+            ctx.strokeStyle = color;
+
+            ctx.lineWidth = 1;
+
+            ctx.stroke();
+        }
+    }
+
+
+    /*
+        Kalp tamamen oluşunca
+        yazıyı göster
+    */
+
+    if (visiblePoints >= points.length) {
+
+        setTimeout(() => {
+
+            document
+                .getElementById("message")
+                .classList.add("show");
+
+        }, 500);
+
+    }
+
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+</script>
+
+</body>
+</html>
